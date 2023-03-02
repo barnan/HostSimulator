@@ -8,6 +8,7 @@ from threading import Thread, Event
 import time
 
 DATETIME_FORMAT = '%Y%m%d_%H%M%S'
+MESSAGE_SENDING_CYCLETIME_SEC = 0.5
 message_to_send = b'\x01\x0c\x04K\x1f\x01\x00\x0b\xac\x00\x00\x9b'
 event = Event()
 openEvent = Event()
@@ -104,7 +105,7 @@ def SendMessagePeriodically() -> None :
             break
         conn.send(message_to_send)
         PrintAndLog(f'Message was sent at {datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")} to {client_address}:  {message_to_send}')
-        time.sleep(2)
+        time.sleep(MESSAGE_SENDING_CYCLETIME_SEC)
 
     return
 
