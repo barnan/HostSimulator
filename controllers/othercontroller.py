@@ -12,3 +12,6 @@ class OtherController :
 
     def stop(self) -> None :
         pass
+
+    def initialize(self) -> None :
+        pass

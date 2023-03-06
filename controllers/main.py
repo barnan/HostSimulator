@@ -9,7 +9,7 @@ class Controller :
     def __init__(self, mainModel, mainView) -> None :
         self.mainView = mainView
         self.mainModel = mainModel
-        self.frameSelectorController = FrameSelectorController(mainModel.frameSelectorModel, mainView.frameselector, mainView)
+        self.frameSelectorController = FrameSelectorController(None, mainView.frameselector, mainView)
         self.photowattHostController = PhotowattHostController(mainModel.photowattHostModel, mainView.frames['PhotowattHostFrame'])
         self.otherController = OtherController(mainModel.photowattHostModel, mainView.frames['OtherFrame'])
 
@@ -28,5 +28,5 @@ class Controller :
 
 
     def after_startup(self, data) -> None :
-        self.frameSelectorController.selectFirstRadioButton()
-        self.photowattHostController.changemessage()
+        self.frameSelectorController.initialize()
+        self.photowattHostController.initialize()

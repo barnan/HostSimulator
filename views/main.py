@@ -13,7 +13,6 @@ class View(ObservableView):
         self.root = RootWindow()
         self.frames = {}
         self.current_frame_index = -1
-        self.previous_frame = None
 
         self.frameselector = FrameSelectorFrame(self.root, highlightbackground="black", highlightthickness=1)
         self.frameselector.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
@@ -32,7 +31,6 @@ class View(ObservableView):
 
 
     def switch_frame(self, newIndex:int) -> None : 
-
         if self.current_frame_index == newIndex :
             return
 
@@ -55,3 +53,4 @@ class View(ObservableView):
 
     def after_startup(self) -> None :
         self.trigger_event('after_startup')
+        

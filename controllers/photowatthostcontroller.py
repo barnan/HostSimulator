@@ -12,10 +12,10 @@ class PhotowattHostController :
     def _bind(self) -> None :       # itt köti rá magát a view widget-eire 
         self.frame.startServerButton.config(command=self.start)
         self.frame.stopServerButton.config(command=self.stop)
-        self.frame.changeMessageButton.config(command=self.changemessage)
-        self.cancel_message_changed = self.model.add_event_listener('message_changed', self.model_on_message_changed)
-        self.cancel_server_started = self.model.add_event_listener('server_started', self.model_on_server_started)
-        self.cancel_server_stopped = self.model.add_event_listener('server_stopped', self.model_on_server_stopped)
+        self.frame.changeMessageButton.config(command=self._changemessage)
+        self.cancel_message_changed = self.model.add_event_listener('message_changed', self._model_on_message_changed)
+        self.cancel_server_started = self.model.add_event_listener('server_started', self._model_on_server_started)
+        self.cancel_server_stopped = self.model.add_event_listener('server_stopped', self._model_on_server_stopped)
 
 
     def start(self) -> None :
@@ -28,14 +28,18 @@ class PhotowattHostController :
         self.model.stop()
 
 
-    def changemessage(self) -> None :
+    def initialize(self) -> None :
+        self._changemessage()
+
+
+    def _changemessage(self) -> None :
         number1 = self.frame.batchId.get()
         number2 = self.frame.theoreticalCounter.get()
         number3 = self.frame.singulationCounter.get()
         self.model.changemessagetosend(number1, number2, number3)
 
 
-    def model_on_message_changed (self, data) -> None :
+    def _model_on_message_changed (self, data) -> None :
         text = list()
         for b in data.message_to_send :
             text.append(hex(b))
@@ -43,14 +47,14 @@ class PhotowattHostController :
         self.frame.sentTextMessage.set(' '.join(text))
 
 
-    def model_on_server_started (self, data) -> None :
+    def _model_on_server_started (self, data) -> None :
         self.frame.startServerButton['state'] = DISABLED
         self.frame.stopServerButton['state'] = NORMAL
         self.frame.host_addressEntry['state'] = DISABLED
         self.frame.portEntry['state'] = DISABLED
         
 
-    def model_on_server_stopped (self, data) -> None :
+    def _model_on_server_stopped (self, data) -> None :
         self.frame.startServerButton['state'] = NORMAL
         self.frame.stopServerButton['state'] =  DISABLED
         self.frame.host_addressEntry['state'] = NORMAL

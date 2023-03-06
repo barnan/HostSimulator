@@ -9,15 +9,20 @@ class FrameSelectorController :
 
 
     def _bind(self) -> None :       # itt köti rá magát a view widget-eire 
-        self.frame.photowattRadioButton.config(command=self.switchframe)
-        self.frame.otherRadioButton.config(command=self.switchframe)
-        
+        self.frame.photowattRadioButton.config(command=self._switchframe)
+        self.frame.otherRadioButton.config(command=self._switchframe)
+     
+  
+    def initialize(self) -> None :
+        self._selectFirstRadioButton()
 
-    def switchframe(self) -> None :
+
+    def _switchframe(self) -> None :
         currentRadioButtonValue = self.frame.radioButtonVariable.get()
         self.mainView.switch_frame(currentRadioButtonValue)
 
-    
-    def selectFirstRadioButton(self) -> None : 
+
+    def _selectFirstRadioButton(self) -> None : 
         self.frame.photowattRadioButton.select()
         self.frame.photowattRadioButton.invoke()
+

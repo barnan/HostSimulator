@@ -1,5 +1,5 @@
 
-from threading import Event
+from threading import Event, Lock
 import select
 import socket
 from threading import Thread
@@ -7,21 +7,47 @@ import time
 from .observablemodel import ObservableModel
 
 MESSAGE_SENDING_CYCLETIME_SEC = 0.5
+CONNECTION_CHECK_CYCLETIME_SEC = 1
 
 class PhotowattHostModel(ObservableModel) :
 
     def __init__(self) -> None:
         super().__init__()
         
-        self.event = Event()
-        self.openEvent = Event()
-        self.conn = None
+        self.lock = Lock()
+        self.stopEvent = Event()
+        #self.openEvent = Event()
+        self.conn = []
         self.message_to_send = ''
         self.thread_open = Thread()
         self.thread_send = Thread()
 
+    
+    def start(self, host_address:str, port_number:int) -> None :
+        self.openEvent.clear()
+        self.stopEvent.clear()
 
-    def _opensocket(self, openEvent: Event, host_address:str, port_number:int) -> None :
+        self.thread_open = Thread(target = self._opensocket, args=(self.openEvent, self.stopEvent, host_address, port_number, ))
+        self.thread_open.start()
+    
+        self.thread_send = Thread(target = self._sendmessageperiodically, args=(self.openEvent, self.stopEvent, ))
+        self.thread_send.start()
+        
+        self.trigger_event('server_started')
+
+
+    def stop(self) -> None :
+        self.stopEvent.set()
+        #self.openEvent.set()
+        if self.thread_send.is_alive() :
+            self.thread_send.join()
+        if self.thread_open.is_alive() :
+            self.thread_open.join()
+        self.trigger_event('server_stopped')
+        # PrintAndLog(f'The host simulator is stopped')
+
+
+    def _opensocket(self, openEvent: Event, stopEvent:Event, host_address:str, port_number:int) -> None :
         server_address = (host_address, port_number)
         # PrintAndLog(f'starting up on {server_address}') 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -34,46 +60,45 @@ class PhotowattHostModel(ObservableModel) :
         while True:
             readingList, writingList, exceptionalConditionList = select.select((sock,), (), (), 1)
             for l in readingList :
-                self.conn, client_address = sock.accept()
+                connection, client_address = sock.accept()
+                
+                self.lock.acquire()
+                try :
+                    self.conn.append(connection)
+                finally :
+                    self.lock.release()
+                
                 # print("Accepting connection from {}:{}".format(*client_address))
                 openEvent.set()
-                return
             else:
-                if openEvent.is_set():
+                if stopEvent.is_set():
                     return
+            time.sleep(CONNECTION_CHECK_CYCLETIME_SEC)
 
 
-    def start(self, host_address:str, port_number:int) -> None :
-        self.openEvent.clear()
-        self.event.clear()
-
-        self.thread_open = Thread(target = self._opensocket, args=(self.openEvent, host_address, port_number, ))
-        self.thread_open.start()
-    
-        self.thread_send = Thread(target = self._sendmessageperiodically, args=(self.openEvent, self.event, ))
-        self.thread_send.start()
-        
-        self.trigger_event('server_started')
-
-
-    def stop(self) -> None :
-        self.event.set()
-        self.openEvent.set()
-        if self.thread_send.is_alive() :
-            self.thread_send.join()
-        if self.thread_open.is_alive() :
-            self.thread_open.join()
-        self.trigger_event('server_stopped')
-        # PrintAndLog(f'The host simulator is stopped')
-
-
-    def _sendmessageperiodically(self, openEvent:Event, event:Event) -> None :
-        openEvent.wait() 
+    def _sendmessageperiodically(self, openEvent:Event, stopEvent:Event) -> None :
+        #openEvent.wait() 
 
         while True :
-            if event.is_set() :
-                break
-            self.conn.send(self.message_to_send)
+            if stopEvent.is_set() :
+                return
+            
+            listToRemove = []
+            
+            self.lock.acquire()
+            try :
+                try :
+                    for connection in self.conn :
+                        connection.send(self.message_to_send)
+                except : 
+                    listToRemove.append(connection)
+                
+                for itemToRemove in listToRemove :
+                    self.conn.remove(itemToRemove)
+
+            finally :
+                self.lock.release()
+
             # PrintAndLog(f'Message was sent at {datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")} to {client_address}:  {message_to_send}')
             time.sleep(MESSAGE_SENDING_CYCLETIME_SEC)
 
