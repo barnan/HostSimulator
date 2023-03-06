@@ -16,3 +16,8 @@ class FrameSelectorController :
     def switchframe(self) -> None :
         currentRadioButtonValue = self.frame.radioButtonVariable.get()
         self.mainView.switch_frame(currentRadioButtonValue)
+
+    
+    def selectFirstRadioButton(self) -> None : 
+        self.frame.photowattRadioButton.select()
+        self.frame.photowattRadioButton.invoke()

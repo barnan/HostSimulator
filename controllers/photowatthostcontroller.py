@@ -10,23 +10,22 @@ class PhotowattHostController :
 
 
     def _bind(self) -> None :       # itt köti rá magát a view widget-eire 
-        self.frame.startServerButton.config(command=self.startserver)
-        self.frame.stopServerButton.config(command=self.stopserver)
+        self.frame.startServerButton.config(command=self.start)
+        self.frame.stopServerButton.config(command=self.stop)
         self.frame.changeMessageButton.config(command=self.changemessage)
         self.cancel_message_changed = self.model.add_event_listener('message_changed', self.model_on_message_changed)
-        self.cancel_message_changed = self.model.add_event_listener('server_started', self.model_on_server_started)
-        self.cancel_message_changed = self.model.add_event_listener('server_stopped', self.model_on_server_stopped)
+        self.cancel_server_started = self.model.add_event_listener('server_started', self.model_on_server_started)
+        self.cancel_server_stopped = self.model.add_event_listener('server_stopped', self.model_on_server_stopped)
 
 
-    def startserver(self) -> None :
-        self.changemessage()
+    def start(self) -> None :
         port_number = self.frame.port_number.get()
         host_address = self.frame.host_address.get()
-        self.model.startmessagesending(host_address, port_number)
+        self.model.start(host_address, port_number)
 
 
-    def stopserver(self) -> None :
-        self.model.stopmessagesending()
+    def stop(self) -> None :
+        self.model.stop()
 
 
     def changemessage(self) -> None :
@@ -37,7 +36,6 @@ class PhotowattHostController :
 
 
     def model_on_message_changed (self, data) -> None :
-        
         text = list()
         for b in data.message_to_send :
             text.append(hex(b))

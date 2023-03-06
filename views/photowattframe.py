@@ -55,4 +55,3 @@ class PhotowattFrame(Frame) :
         self.sentMessageLabel.grid(row=6, column=0, padx=5, pady=5)
         self.sentMessageEntry.grid(row=7, column=0, columnspan=3, padx=5, pady=5)
 
-        # self.protocol("WM_DELETE_WINDOW", MainWindow_OnClosing)

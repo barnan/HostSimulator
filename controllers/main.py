@@ -1,4 +1,5 @@
 
+from .othercontroller import OtherController
 from .frameselectorcontroller import FrameSelectorController
 from .photowatthostcontroller import PhotowattHostController
 
@@ -10,9 +11,22 @@ class Controller :
         self.mainModel = mainModel
         self.frameSelectorController = FrameSelectorController(mainModel.frameSelectorModel, mainView.frameselector, mainView)
         self.photowattHostController = PhotowattHostController(mainModel.photowattHostModel, mainView.frames['PhotowattHostFrame'])
+        self.otherController = OtherController(mainModel.photowattHostModel, mainView.frames['OtherFrame'])
 
-        # self.mainModel.frameSelectorModel.add_event_listener('frame_selector_changed', self.frameselectorchanged)
-    
+        self.cancel_mainwindow_onclosing = self.mainView.add_event_listener('mainwindow_onclosing', self.mainwindow_onclosing)
+        self.cancel_after_startup = self.mainView.add_event_listener('after_startup', self.after_startup)
+        
 
     def start(self) -> None :
         self.mainView.start_mainloop()
+
+
+    def mainwindow_onclosing(self, data) -> None :
+        self.photowattHostController.stop()
+        self.otherController.stop()
+        self.mainView.destroyroot()
+
+
+    def after_startup(self, data) -> None :
+        self.frameSelectorController.selectFirstRadioButton()
+        self.photowattHostController.changemessage()

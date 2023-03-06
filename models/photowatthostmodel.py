@@ -17,6 +17,8 @@ class PhotowattHostModel(ObservableModel) :
         self.openEvent = Event()
         self.conn = None
         self.message_to_send = ''
+        self.thread_open = Thread()
+        self.thread_send = Thread()
 
 
     def _opensocket(self, openEvent: Event, host_address:str, port_number:int) -> None :
@@ -41,7 +43,7 @@ class PhotowattHostModel(ObservableModel) :
                     return
 
 
-    def startmessagesending(self, host_address:str, port_number:int) -> None :
+    def start(self, host_address:str, port_number:int) -> None :
         self.openEvent.clear()
         self.event.clear()
 
@@ -54,7 +56,7 @@ class PhotowattHostModel(ObservableModel) :
         self.trigger_event('server_started')
 
 
-    def stopmessagesending(self) -> None :
+    def stop(self) -> None :
         self.event.set()
         self.openEvent.set()
         if self.thread_send.is_alive() :

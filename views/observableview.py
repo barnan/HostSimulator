@@ -1,5 +1,5 @@
 
-class ObservableModel :
+class ObservableView :
 
     def __init__(self) :
         self._event_listeners = {}          # create empty dictionary
@@ -11,7 +11,7 @@ class ObservableModel :
         else :
             self._event_listeners[event_name].append(fn)
 
-        return lambda : self._event_listeners[event_name].remove(fn)        # give back the delegate with the removal
+        return lambda : self._event_listeners.remove(fn)        # give back the delegate with the removal
 
 
     def trigger_event(self, event_name) -> None :
