@@ -8,12 +8,10 @@ class RootWindow(Tk) :
         super().__init__()
 
         width = 550
-        height = 300
+        height = 400
 
         self.geometry(f'{width}x{height}')
         self.title(f'Host Simulator {str(_VERSION_NUMBER)}')
         self.resizable(False, False)
-        # self.grid_columnconfigure(0, weight=1)
-        # self.grid_columnconfigure(1, weight=3)
-        # self.grid_rowconfigure(0, weight=1)
+
         

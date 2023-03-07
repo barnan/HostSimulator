@@ -2,7 +2,7 @@
 from models.observablemodel import ObservableModel
 
 
-class OtherModel(ObservableModel) :
+class HanwhaKoreaModel(ObservableModel) :
 
     def __init__(self) -> None :
         super().__init__()

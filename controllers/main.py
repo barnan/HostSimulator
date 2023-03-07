@@ -1,5 +1,5 @@
 
-from .othercontroller import OtherController
+from .hanwhakoreacontroller import HanwhaKoreaController
 from .frameselectorcontroller import FrameSelectorController
 from .photowatthostcontroller import PhotowattHostController
 
@@ -11,7 +11,7 @@ class Controller :
         self.mainModel = mainModel
         self.frameSelectorController = FrameSelectorController(None, mainView.frameselector, mainView)
         self.photowattHostController = PhotowattHostController(mainModel.photowattHostModel, mainView.frames['PhotowattHostFrame'])
-        self.otherController = OtherController(mainModel.photowattHostModel, mainView.frames['OtherFrame'])
+        self.hanwhaKoreaController = HanwhaKoreaController(mainModel.photowattHostModel, mainView.frames['HanwhaKoreaFrame'])
 
         self.cancel_mainwindow_onclosing = self.mainView.add_event_listener('mainwindow_onclosing', self.mainwindow_onclosing)
         self.cancel_after_startup = self.mainView.add_event_listener('after_startup', self.after_startup)
@@ -23,7 +23,7 @@ class Controller :
 
     def mainwindow_onclosing(self, data) -> None :
         self.photowattHostController.stop()
-        self.otherController.stop()
+        self.hanwhaKoreaController.stop()
         self.mainView.destroyroot()
 
 

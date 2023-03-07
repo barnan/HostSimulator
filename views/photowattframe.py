@@ -26,16 +26,17 @@ class PhotowattFrame(Frame) :
         self.batchIdEntry = tk.Entry(self, textvariable=self.batchId, width=10, state=NORMAL)
         self.theoreticalCounterEntry = tk.Entry(self, textvariable=self.theoreticalCounter, width=10, state=NORMAL)
         self.singulationCounterEntry =  tk.Entry(self, textvariable=self.singulationCounter, width=10, state=NORMAL)
+        self.connectionEntry =  tk.Text(self, width=20, height=3, state=NORMAL)      
         self.sentMessageEntry =  tk.Entry(self, textvariable=self.sentTextMessage, width=50, state=DISABLED)
 
         self.portLabel = tk.Label(self, text="Server address")
         self.batchIdLabel = tk.Label(self, text="BatchID")
         self.theoreticalCounterLabel = tk.Label(self, text="Theoretical Counter")
         self.singulationCounterLabel = tk.Label(self, text="Singulation Counter")
+        self.connectionLabel = tk.Label(self, text='Connections')
         self.sentMessageLabel = tk.Label(self, text="Sent Message")
 
-
-        self.startServerButton.grid(row=0, column=1, padx=5, pady=5)
+        self.startServerButton.grid(row=0, column=1, padx=5, pady=5, sticky='w')
         self.stopServerButton.grid(row=0, column=2, padx=5, pady=5)
         self.changeMessageButton.grid(row=5, column=1, columnspan=2, padx=5, pady=5)
 
@@ -54,4 +55,7 @@ class PhotowattFrame(Frame) :
 
         self.sentMessageLabel.grid(row=6, column=0, padx=5, pady=5)
         self.sentMessageEntry.grid(row=7, column=0, columnspan=3, padx=5, pady=5)
+
+        self.connectionLabel.grid(row=8, column=0, padx=5, pady=5)
+        self.connectionEntry.grid(row=8, column=1, columnspan=2, padx=5, pady=5)
 

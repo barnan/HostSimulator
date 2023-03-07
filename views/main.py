@@ -3,7 +3,7 @@ from .observableview import ObservableView
 from .photowattframe import PhotowattFrame
 from .rootwindow import RootWindow
 from .frameselectorframe import FrameSelectorFrame
-from .otherframe import OtherFrame
+from .hanwhakoreaframe import HanwhaKoreaFrame
 
 
 class View(ObservableView):
@@ -19,7 +19,7 @@ class View(ObservableView):
         self.frameselector.tkraise()
 
         self.add_frame(PhotowattFrame, 'PhotowattHostFrame')
-        self.add_frame(OtherFrame, 'OtherFrame')        
+        self.add_frame(HanwhaKoreaFrame, 'HanwhaKoreaFrame')        
         
         self.root.protocol("WM_DELETE_WINDOW", self.mainwindow_onclosing)
         self.root.after(500, self.after_startup)

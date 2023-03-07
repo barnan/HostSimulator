@@ -1,4 +1,4 @@
-from tkinter import DISABLED, NORMAL
+from tkinter import DISABLED, END, NORMAL
 
 
 class PhotowattHostController : 
@@ -16,6 +16,7 @@ class PhotowattHostController :
         self.cancel_message_changed = self.model.add_event_listener('message_changed', self._model_on_message_changed)
         self.cancel_server_started = self.model.add_event_listener('server_started', self._model_on_server_started)
         self.cancel_server_stopped = self.model.add_event_listener('server_stopped', self._model_on_server_stopped)
+        self.cancel_connection_changed = self.model.add_event_listener('connection_list_changed', self._model_on_connection_changed)
 
 
     def start(self) -> None :
@@ -59,4 +60,11 @@ class PhotowattHostController :
         self.frame.stopServerButton['state'] =  DISABLED
         self.frame.host_addressEntry['state'] = NORMAL
         self.frame.portEntry['state'] = NORMAL
+
+    def _model_on_connection_changed(self, data) -> None :
+        self.frame.connectionEntry.delete('0', END)
+        for item in data.last_conn_list :
+            self.frame.connectionEntry.insert(END, f'{item[0]} {item[1]}\n')
+        pass
+
         

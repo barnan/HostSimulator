@@ -1,5 +1,5 @@
 
-class OtherController :
+class HanwhaKoreaController :
     
     def __init__(self, model, frame) -> None :
         self.model = model

@@ -1,4 +1,5 @@
 
+import sys
 from threading import Event, Lock
 import select
 import socket
@@ -21,16 +22,17 @@ class PhotowattHostModel(ObservableModel) :
         self.message_to_send = ''
         self.thread_open = Thread()
         self.thread_send = Thread()
+        self.last_conn_list = []
 
     
     def start(self, host_address:str, port_number:int) -> None :
-        self.openEvent.clear()
+        # self.openEvent.clear()
         self.stopEvent.clear()
 
-        self.thread_open = Thread(target = self._opensocket, args=(self.openEvent, self.stopEvent, host_address, port_number, ))
+        self.thread_open = Thread(target = self._opensocket, args=(self.stopEvent, host_address, port_number, ))
         self.thread_open.start()
     
-        self.thread_send = Thread(target = self._sendmessageperiodically, args=(self.openEvent, self.stopEvent, ))
+        self.thread_send = Thread(target = self._sendmessageperiodically, args=(self.stopEvent, ))
         self.thread_send.start()
         
         self.trigger_event('server_started')
@@ -39,15 +41,16 @@ class PhotowattHostModel(ObservableModel) :
     def stop(self) -> None :
         self.stopEvent.set()
         #self.openEvent.set()
-        if self.thread_send.is_alive() :
-            self.thread_send.join()
         if self.thread_open.is_alive() :
             self.thread_open.join()
+        if self.thread_send.is_alive() :
+            self.thread_send.join()
+
         self.trigger_event('server_stopped')
         # PrintAndLog(f'The host simulator is stopped')
 
 
-    def _opensocket(self, openEvent: Event, stopEvent:Event, host_address:str, port_number:int) -> None :
+    def _opensocket(self, stopEvent:Event, host_address:str, port_number:int) -> None :
         server_address = (host_address, port_number)
         # PrintAndLog(f'starting up on {server_address}') 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -64,37 +67,44 @@ class PhotowattHostModel(ObservableModel) :
                 
                 self.lock.acquire()
                 try :
-                    self.conn.append(connection)
+                    self.conn.append((connection, client_address))
+                    self._copyconn(self.conn)
+                    
                 finally :
                     self.lock.release()
-                
+
                 # print("Accepting connection from {}:{}".format(*client_address))
-                openEvent.set()
+                # openEvent.set()
             else:
                 if stopEvent.is_set():
+                    sock.close()
                     return
             time.sleep(CONNECTION_CHECK_CYCLETIME_SEC)
 
 
-    def _sendmessageperiodically(self, openEvent:Event, stopEvent:Event) -> None :
+    def _sendmessageperiodically(self, stopEvent:Event) -> None :
         #openEvent.wait() 
 
         while True :
-            if stopEvent.is_set() :
-                return
-            
-            listToRemove = []
-            
             self.lock.acquire()
             try :
+                if stopEvent.is_set() :
+                    self._closesockets(self.conn)
+                    return
+            
+                listToRemove = []
+
                 try :
                     for connection in self.conn :
-                        connection.send(self.message_to_send)
+                        connection[0].send(self.message_to_send)
                 except : 
                     listToRemove.append(connection)
                 
-                for itemToRemove in listToRemove :
-                    self.conn.remove(itemToRemove)
+                if len(listToRemove) > 0 :
+                    for itemToRemove in listToRemove :
+                        self.conn.remove(itemToRemove)
+    
+                    self._copyconn(self.conn)
 
             finally :
                 self.lock.release()
@@ -124,4 +134,25 @@ class PhotowattHostModel(ObservableModel) :
 
         self.message_to_send = bytes(xs)
         self.trigger_event('message_changed')
+
+
+    def _copyconn(self, conn:list) -> None :
+        self.last_conn_list.clear()
+        for element in conn :
+            self.last_conn_list.append(element[1])
+        
+        self.trigger_event('connection_list_changed')
+
+
+    def _closesockets(self, conn:list) -> None :
+        try :
+            for connection in conn :
+                connection[0].shutdown(socket.SHUT_RDWR)
+                connection[0].close()
+            conn.clear()
+        except : 
+            exception_type, exception_object, exception_traceback = sys.exc_info()
+            pass
+
+        self._copyconn(conn)
 
