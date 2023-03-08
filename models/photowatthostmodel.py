@@ -41,6 +41,9 @@ class PhotowattHostModel(ObservableModel) :
     def stop(self) -> None :
         self.stopEvent.set()
         #self.openEvent.set()
+
+        time.sleep(2)
+
         if self.thread_open.is_alive() :
             self.thread_open.join()
         if self.thread_send.is_alive() :
@@ -68,17 +71,21 @@ class PhotowattHostModel(ObservableModel) :
                 self.lock.acquire()
                 try :
                     self.conn.append((connection, client_address))
-                    self._copyconn(self.conn)
+                    self._copyconn()
                     
                 finally :
                     self.lock.release()
 
                 # print("Accepting connection from {}:{}".format(*client_address))
                 # openEvent.set()
-            else:
-                if stopEvent.is_set():
+            
+            if stopEvent.is_set():
+                try :
                     sock.close()
-                    return
+                except : 
+                    exception_type, exception_object, exception_traceback = sys.exc_info()
+                return
+
             time.sleep(CONNECTION_CHECK_CYCLETIME_SEC)
 
 
@@ -89,7 +96,7 @@ class PhotowattHostModel(ObservableModel) :
             self.lock.acquire()
             try :
                 if stopEvent.is_set() :
-                    self._closesockets(self.conn)
+                    self._closesockets()
                     return
             
                 listToRemove = []
@@ -104,7 +111,7 @@ class PhotowattHostModel(ObservableModel) :
                     for itemToRemove in listToRemove :
                         self.conn.remove(itemToRemove)
     
-                    self._copyconn(self.conn)
+                    self._copyconn()
 
             finally :
                 self.lock.release()
@@ -136,23 +143,22 @@ class PhotowattHostModel(ObservableModel) :
         self.trigger_event('message_changed')
 
 
-    def _copyconn(self, conn:list) -> None :
+    def _copyconn(self) -> None :
         self.last_conn_list.clear()
-        for element in conn :
+        for element in self.conn :
             self.last_conn_list.append(element[1])
         
         self.trigger_event('connection_list_changed')
 
 
-    def _closesockets(self, conn:list) -> None :
+    def _closesockets(self) -> None :
         try :
-            for connection in conn :
+            for connection in self.conn :
                 connection[0].shutdown(socket.SHUT_RDWR)
                 connection[0].close()
-            conn.clear()
+            self.conn.clear()
         except : 
             exception_type, exception_object, exception_traceback = sys.exc_info()
-            pass
 
-        self._copyconn(conn)
+        self._copyconn()
 

@@ -16,6 +16,7 @@ class PhotowattFrame(Frame) :
         self.theoreticalCounter = tk.IntVar(self, 301)
         self.singulationCounter = tk.IntVar(self, 302)
         self.sentTextMessage = tk.StringVar(self, '')
+        self.connections = tk.StringVar(self, '')
 
         self.startServerButton = tk.Button(self, text="Start Server", width=10, state=NORMAL)
         self.stopServerButton = tk.Button(self, text="Stop Server", width=10, state=DISABLED)
@@ -26,14 +27,14 @@ class PhotowattFrame(Frame) :
         self.batchIdEntry = tk.Entry(self, textvariable=self.batchId, width=10, state=NORMAL)
         self.theoreticalCounterEntry = tk.Entry(self, textvariable=self.theoreticalCounter, width=10, state=NORMAL)
         self.singulationCounterEntry =  tk.Entry(self, textvariable=self.singulationCounter, width=10, state=NORMAL)
-        self.connectionEntry =  tk.Text(self, width=20, height=3, state=NORMAL)      
+        # self.connectionEntry =  tk.Label(self, textvariable=self.connections, width=20)      
         self.sentMessageEntry =  tk.Entry(self, textvariable=self.sentTextMessage, width=50, state=DISABLED)
 
         self.portLabel = tk.Label(self, text="Server address")
         self.batchIdLabel = tk.Label(self, text="BatchID")
         self.theoreticalCounterLabel = tk.Label(self, text="Theoretical Counter")
         self.singulationCounterLabel = tk.Label(self, text="Singulation Counter")
-        self.connectionLabel = tk.Label(self, text='Connections')
+        # self.connectionLabel = tk.Label(self, text='Established\nConnections')
         self.sentMessageLabel = tk.Label(self, text="Sent Message")
 
         self.startServerButton.grid(row=0, column=1, padx=5, pady=5, sticky='w')
@@ -56,6 +57,6 @@ class PhotowattFrame(Frame) :
         self.sentMessageLabel.grid(row=6, column=0, padx=5, pady=5)
         self.sentMessageEntry.grid(row=7, column=0, columnspan=3, padx=5, pady=5)
 
-        self.connectionLabel.grid(row=8, column=0, padx=5, pady=5)
-        self.connectionEntry.grid(row=8, column=1, columnspan=2, padx=5, pady=5)
+        # self.connectionLabel.grid(row=8, column=0, padx=5, pady=5)
+        # self.connectionEntry.grid(row=8, column=1, columnspan=2, padx=5, pady=5)
 
