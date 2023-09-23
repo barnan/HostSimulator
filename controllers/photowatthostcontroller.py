@@ -61,6 +61,7 @@ class PhotowattHostController :
         self.frame.host_addressEntry['state'] = NORMAL
         self.frame.portEntry['state'] = NORMAL
 
+
     def _model_on_connection_changed(self, data) -> None :
         resu = ''
         for item in data.last_conn_list :

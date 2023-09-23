@@ -17,7 +17,6 @@ class PhotowattHostModel(ObservableModel) :
         
         self.lock = Lock()
         self.stopEvent = Event()
-        #self.openEvent = Event()
         self.conn = []
         self.message_to_send = ''
         self.thread_open = Thread()
@@ -26,7 +25,6 @@ class PhotowattHostModel(ObservableModel) :
 
     
     def start(self, host_address:str, port_number:int) -> None :
-        # self.openEvent.clear()
         self.stopEvent.clear()
 
         self.thread_open = Thread(target = self._opensocket, args=(self.stopEvent, host_address, port_number, ))
@@ -40,9 +38,8 @@ class PhotowattHostModel(ObservableModel) :
 
     def stop(self) -> None :
         self.stopEvent.set()
-        #self.openEvent.set()
 
-        time.sleep(2)
+        time.sleep(CONNECTION_CHECK_CYCLETIME_SEC)
 
         if self.thread_open.is_alive() :
             self.thread_open.join()
@@ -51,6 +48,7 @@ class PhotowattHostModel(ObservableModel) :
 
         self.trigger_event('server_stopped')
         # PrintAndLog(f'The host simulator is stopped')
+        return
 
 
     def _opensocket(self, stopEvent:Event, host_address:str, port_number:int) -> None :
@@ -65,6 +63,7 @@ class PhotowattHostModel(ObservableModel) :
 
         while True:
             readingList, writingList, exceptionalConditionList = select.select((sock,), (), (), 1)
+            
             for l in readingList :
                 connection, client_address = sock.accept()
                 
@@ -77,7 +76,6 @@ class PhotowattHostModel(ObservableModel) :
                     self.lock.release()
 
                 # print("Accepting connection from {}:{}".format(*client_address))
-                # openEvent.set()
             
             if stopEvent.is_set():
                 try :
@@ -90,8 +88,6 @@ class PhotowattHostModel(ObservableModel) :
 
 
     def _sendmessageperiodically(self, stopEvent:Event) -> None :
-        #openEvent.wait() 
-
         while True :
             self.lock.acquire()
             try :
@@ -100,12 +96,12 @@ class PhotowattHostModel(ObservableModel) :
                     return
             
                 listToRemove = []
-
-                try :
-                    for connection in self.conn :
+                
+                for connection in self.conn :
+                    try :
                         connection[0].send(self.message_to_send)
-                except : 
-                    listToRemove.append(connection)
+                    except : 
+                        listToRemove.append(connection)
                 
                 if len(listToRemove) > 0 :
                     for itemToRemove in listToRemove :

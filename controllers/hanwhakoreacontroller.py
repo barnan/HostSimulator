@@ -13,5 +13,6 @@ class HanwhaKoreaController :
     def stop(self) -> None :
         pass
 
+
     def initialize(self) -> None :
         pass

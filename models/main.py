@@ -6,4 +6,4 @@ class Model :
     
     def __init__(self) -> None :
         self.photowattHostModel = PhotowattHostModel()
-        self.otherModel = HanwhaKoreaModel()
+        self.hanwhaHostModel = HanwhaKoreaModel()
